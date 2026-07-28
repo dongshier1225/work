@@ -1,0 +1,1793 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日必行</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --sidebar-bg: #0f172a;
+    --sidebar-active: #3b82f6;
+    --sidebar-hover: #1e293b;
+    --content-bg: #f8fafc;
+    --card-bg: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --text-light: #94a3b8;
+    --border: #e2e8f0;
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --danger: #ef4444;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --purple: #8b5cf6;
+    --shadow-sm: 0 1px 2px rgba(15,23,42,0.04);
+    --shadow-md: 0 4px 16px rgba(15,23,42,0.06);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--content-bg);
+    color: var(--text-primary);
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* 侧边栏 */
+  .sidebar {
+    width: 200px;
+    background: var(--sidebar-bg);
+    color: var(--text-light);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+
+  .sidebar-header {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid #1e293b;
+  }
+
+  .sidebar-header h1 {
+    font-size: 19px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: 0.5px;
+  }
+
+  .menu {
+    list-style: none;
+    padding: 10px 8px;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .menu li {
+    padding: 11px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13.5px;
+    margin-bottom: 2px;
+    transition: all 0.15s ease;
+    user-select: none;
+    color: var(--text-light);
+  }
+
+  .menu li:hover {
+    background: var(--sidebar-hover);
+    color: #fff;
+  }
+
+  .menu li.active {
+    background: var(--sidebar-active);
+    color: #fff;
+    font-weight: 500;
+  }
+
+  .menu li .icon {
+    width: 18px;
+    text-align: center;
+    font-size: 15px;
+  }
+
+  .sidebar-footer {
+    padding: 12px 20px;
+    border-top: 1px solid #1e293b;
+    font-size: 11px;
+    color: #475569;
+    text-align: center;
+  }
+
+  /* 主内容区 */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .topbar {
+    background: var(--card-bg);
+    padding: 18px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .topbar h2 {
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: 0.3px;
+  }
+
+  .topbar .desc {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    margin-top: 3px;
+  }
+
+  .topbar-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+    letter-spacing: 0.2px;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--primary-hover); }
+
+  .btn-success {
+    background: var(--success);
+    color: #fff;
+  }
+  .btn-success:hover { background: #059669; }
+
+  .btn-purple {
+    background: var(--purple);
+    color: #fff;
+  }
+  .btn-purple:hover { background: #7c3aed; }
+
+  .btn-default {
+    background: #f1f5f9;
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+  }
+  .btn-default:hover { background: #e2e8f0; }
+
+  .btn-danger-sm {
+    background: none;
+    color: var(--danger);
+    cursor: pointer;
+    border: none;
+    font-size: 16px;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  .btn-danger-sm:hover { background: #fee2e2; }
+
+  /* 表格容器 */
+  .content {
+    flex: 1;
+    overflow: auto;
+    padding: 24px 32px;
+  }
+
+  .table-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+  }
+
+  thead { background: #f8fafc; }
+
+  th {
+    text-align: left;
+    padding: 13px 16px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+    font-size: 12.5px;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+  }
+
+  td {
+    padding: 0;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  td .cell {
+    padding: 11px 16px;
+    min-height: 44px;
+    cursor: text;
+    outline: none;
+    word-break: break-word;
+    white-space: pre-wrap;
+    line-height: 1.6;
+  }
+
+  td .cell:empty::before {
+    content: '点击输入...';
+    color: #cbd5e1;
+  }
+
+  td .cell:focus {
+    background: #eff6ff;
+    box-shadow: inset 0 0 0 2px var(--primary);
+  }
+
+  tbody tr:hover { background: #f8fafc; }
+
+  .col-action {
+    width: 60px;
+    text-align: center;
+  }
+
+  .col-action .cell {
+    cursor: default;
+    text-align: center;
+  }
+
+  /* 提醒行高亮 */
+  tr.row-overdue {
+    background: #fef2f2 !important;
+  }
+  tr.row-overdue:hover {
+    background: #fee2e2 !important;
+  }
+  tr.row-today {
+    background: #fffbeb !important;
+  }
+  tr.row-today:hover {
+    background: #fef3c7 !important;
+  }
+
+  .row-badge {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    margin-left: 6px;
+    vertical-align: 1px;
+  }
+  .badge-overdue {
+    background: #fecaca;
+    color: #b91c1c;
+  }
+  .badge-today {
+    background: #fde68a;
+    color: #92400e;
+  }
+
+  /* 空状态 */
+  .empty-state {
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--text-secondary);
+  }
+
+  .empty-state .big-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+
+  /* 统计卡片 */
+  .stats {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  .stat-card {
+    background: var(--card-bg);
+    padding: 15px 18px;
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .stat-card .stat-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .stat-card .stat-num {
+    font-size: 21px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+  }
+
+  .stat-card .stat-label {
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  /* 录音整理面板 */
+  .record-panel {
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    padding: 20px 24px;
+    margin-bottom: 18px;
+    border: 1px solid var(--border);
+  }
+
+  .record-panel-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .record-panel-title .badge {
+    font-size: 11px;
+    font-weight: 500;
+    background: #ede9fe;
+    color: var(--purple);
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+
+  .record-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+  }
+
+  .file-input-wrapper input[type=file] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .file-name {
+    font-size: 13px;
+    color: var(--text-secondary);
+    background: #f1f5f9;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+
+  .record-textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    resize: vertical;
+    outline: none;
+    line-height: 1.6;
+    color: var(--text-primary);
+    background: #fafbfc;
+  }
+
+  .record-textarea:focus {
+    border-color: var(--primary);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+  }
+
+  .record-textarea::placeholder {
+    color: #cbd5e1;
+  }
+
+  .record-hint {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  .record-hint code {
+    background: #f1f5f9;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: var(--primary);
+  }
+
+  .transcribe-status {
+    margin-top: 10px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    display: none;
+  }
+
+  .transcribe-status.show { display: block; }
+  .transcribe-status.info { background: #eff6ff; color: #1e40af; }
+  .transcribe-status.success { background: #ecfdf5; color: #065f46; }
+  .transcribe-status.error { background: #fef2f2; color: #991b1b; }
+
+  .transcribe-status .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-right: 6px;
+    vertical-align: -2px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* 提示 */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #1e293b;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.25s ease;
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* 下拉选择 */
+  select.cell-select {
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 10px 14px;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  select.cell-select:focus {
+    background: #eff6ff;
+    box-shadow: inset 0 0 0 2px var(--primary);
+  }
+
+  /* 备忘录记事本视图 */
+  .memo-note-view {
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 180px);
+    min-height: 400px;
+  }
+
+  .memo-note-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: #f8fafc;
+    border-radius: 12px 12px 0 0;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .memo-note-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .memo-meta-input {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    outline: none;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: #fff;
+  }
+  .memo-meta-input:focus { border-color: var(--primary); }
+
+  .memo-meta-select {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    outline: none;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: #fff;
+    cursor: pointer;
+  }
+  .memo-meta-select:focus { border-color: var(--primary); }
+
+  .memo-note-title-input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text-primary);
+    padding: 20px 28px 8px;
+    font-family: inherit;
+    background: transparent;
+  }
+  .memo-note-title-input::placeholder { color: #cbd5e1; }
+
+  .memo-note-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 28px;
+  }
+
+  .memo-note-textarea {
+    flex: 1;
+    width: 100%;
+    border: none;
+    outline: none;
+    resize: none;
+    padding: 20px 28px;
+    font-size: 15px;
+    line-height: 1.9;
+    font-family: inherit;
+    color: var(--text-primary);
+    background: transparent;
+    min-height: 300px;
+  }
+  .memo-note-textarea::placeholder { color: #cbd5e1; }
+
+  .memo-note-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 28px;
+    border-top: 1px solid var(--border);
+    background: #f8fafc;
+    border-radius: 0 0 12px 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .memo-word-count { font-variant-numeric: tabular-nums; }
+  .memo-save-hint::before { content: '💾 '; }
+
+  /* 备忘录列表卡片 */
+  .memo-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+
+  .memo-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .memo-card:hover {
+    border-color: var(--primary);
+    box-shadow: 0 4px 12px rgba(59,130,246,0.12);
+    transform: translateY(-1px);
+  }
+
+  .memo-card-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.4;
+  }
+
+  .memo-card-preview {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 38px;
+  }
+
+  .memo-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11.5px;
+    color: var(--text-light);
+  }
+
+  .memo-card-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .tag-灵感 { background: #fef3c7; color: #92400e; }
+  .tag-想法 { background: #e0e7ff; color: #3730a3; }
+  .tag-待记 { background: #fee2e2; color: #991b1b; }
+  .tag-资料 { background: #dbeafe; color: #1e40af; }
+  .tag-学习 { background: #d1fae5; color: #065f46; }
+  .tag-生活 { background: #fce7f3; color: #9d174d; }
+  .tag-其他 { background: #f1f5f9; color: #475569; }
+
+  .memo-empty {
+    grid-column: 1 / -1;
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--text-secondary);
+  }
+
+  .memo-empty .big-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+  }
+
+  /* 模态框 */
+  .modal-mask {
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+  }
+
+  .modal-mask.show { display: flex; }
+
+  .modal {
+    background: #fff;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 520px;
+    max-height: 85vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .modal-close:hover { background: #f1f5f9; }
+
+  .modal-body {
+    padding: 20px;
+    overflow: auto;
+    flex: 1;
+  }
+
+  .modal-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .ai-result {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    max-height: 300px;
+    overflow: auto;
+  }
+
+  .ai-result .field-label {
+    font-weight: 600;
+    color: var(--purple);
+  }
+</style>
+</head>
+<body>
+
+<!-- 侧边栏 -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <h1>📋 日必行</h1>
+  </div>
+  <ul class="menu" id="menu">
+    <li class="active" data-key="review">
+      <span class="icon">🌟</span><span>每周复盘</span>
+    </li>
+    <li data-key="todo">
+      <span class="icon">✅</span><span>待办工作</span>
+    </li>
+    <li data-key="schedule">
+      <span class="icon">📅</span><span>本周日程</span>
+    </li>
+    <li data-key="meeting">
+      <span class="icon">📂</span><span>会议资料整理</span>
+    </li>
+    <li data-key="finance">
+      <span class="icon">💰</span><span>理财实时咨询</span>
+    </li>
+    <li data-key="reminder">
+      <span class="icon">🔔</span><span>提醒功能</span>
+    </li>
+    <li data-key="memo">
+      <span class="icon">📝</span><span>备忘录</span>
+    </li>
+  </ul>
+  <div class="sidebar-footer">数据本地存储 · 自动保存</div>
+</aside>
+
+<!-- 主内容 -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <h2 id="pageTitle">待办工作</h2>
+      <div class="desc" id="pageDesc">管理你的日常工作任务</div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-default" onclick="exportCSV()">⬇ 导出CSV</button>
+      <button class="btn btn-success" onclick="addRow()">➕ 新增一行</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="stats" id="stats"></div>
+
+    <!-- 会议录音整理面板（仅 meeting 模块显示） -->
+    <div class="record-panel" id="recordPanel" style="display:none;">
+      <div class="record-panel-title">
+        🎙️ 会议录音智能整理
+        <span class="badge">AI 助手</span>
+      </div>
+      <div class="record-actions">
+        <div class="file-input-wrapper">
+          <button class="btn btn-purple">🎵 上传录音文件</button>
+          <input type="file" id="audioFile" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac">
+        </div>
+        <button class="btn btn-primary" onclick="startRealTimeTranscribe()">🎤 实时录音转写</button>
+        <span id="fileName" class="file-name" style="display:none;"></span>
+      </div>
+      <textarea class="record-textarea" id="meetingText" placeholder="👇 方式一：上传录音文件后，转写文本会显示在这里（可编辑）&#10;👇 方式二：直接粘贴会议的文字记录、聊天记录、或会议笔记...&#10;&#10;示例：&#10;今天上午10点开了Q3产品规划会，参会人员有产品经理小王、研发负责人老李、设计师小张。会议讨论了下半年的三个核心功能：1. 用户中心改版，2. 支付流程优化，3. 数据看板。最终确定优先做支付流程优化，因为影响转化率。老李负责8月10日前出技术方案，小张8月5日前完成UI设计，小王本周五前对齐业务需求。"></textarea>
+      <div class="record-hint">
+        💡 提示：上传录音文件后，浏览器会尝试自动转写文字（需浏览器支持）；也可直接粘贴会议笔记/聊天记录。点击下方按钮，<code>AI</code> 会自动提取<strong>会议名称、参会人员、关键要点、后续跟进</strong>并填入表格。
+      </div>
+      <div class="transcribe-status" id="transcribeStatus"></div>
+      <div class="record-actions" style="margin-top: 12px;">
+        <button class="btn btn-primary" onclick="generateMinutes()">✨ AI 整理会议纪要</button>
+        <button class="btn btn-default" onclick="clearMeetingText()">清空文本</button>
+      </div>
+    </div>
+
+    <div class="table-card" id="tableCard">
+      <table id="dataTable">
+        <thead id="tableHead"></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- 备忘录记事本视图（仅 memo 模块显示） -->
+    <div class="memo-note-view" id="memoNoteView" style="display:none;">
+      <div class="memo-note-toolbar">
+        <button class="btn btn-default" onclick="backToMemoList()">← 返回列表</button>
+        <div class="memo-note-meta">
+          <input type="text" id="memoNoteDate" class="memo-meta-input" placeholder="日期" style="width:120px;">
+          <select id="memoNoteTag" class="memo-meta-select">
+            <option value="灵感">灵感</option>
+            <option value="想法">想法</option>
+            <option value="待记">待记</option>
+            <option value="资料">资料</option>
+            <option value="学习">学习</option>
+            <option value="生活">生活</option>
+            <option value="其他">其他</option>
+          </select>
+          <select id="memoNoteStatus" class="memo-meta-select">
+            <option value="活跃">活跃</option>
+            <option value="已归档">已归档</option>
+          </select>
+        </div>
+        <button class="btn btn-danger-sm" onclick="deleteCurrentMemo()" title="删除此条">🗑 删除</button>
+      </div>
+      <input type="text" id="memoNoteTitle" class="memo-note-title-input" placeholder="输入标题...">
+      <div class="memo-note-divider"></div>
+      <textarea id="memoNoteContent" class="memo-note-textarea" placeholder="在此自由书写..."></textarea>
+      <div class="memo-note-footer">
+        <span id="memoWordCount" class="memo-word-count">0 字</span>
+        <span class="memo-save-hint">自动保存</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AI 结果预览模态框 -->
+<div class="modal-mask" id="resultModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>✨ AI 整理结果</h3>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="ai-result" id="aiResultContent"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" onclick="closeModal()">取消</button>
+      <button class="btn btn-success" onclick="confirmFillMinutes()">确认填入表格</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ 配置 ============
+const CONFIG = {
+  review: {
+    title: '每周复盘',
+    desc: '回顾本周工作，总结收获与不足，规划下周',
+    columns: [
+      { key: 'week', label: '周次', type: 'text', width: '14%' },
+      { key: 'summary', label: '本周总结', type: 'text', width: '26%' },
+      { key: 'gains', label: '主要收获', type: 'text', width: '22%' },
+      { key: 'issues', label: '不足与问题', type: 'text', width: '20%' },
+      { key: 'nextplan', label: '下周计划', type: 'text', width: '18%' },
+    ],
+    sample: [
+      { week: '2026-W30', summary: '完成Q3规划会，推进支付优化项目', gains: '明确了下半年3个核心优先级', issues: '跨部门协作效率待提升', nextplan: '8月10日前出技术方案' },
+      { week: '2026-W29', summary: '客户拜访3家，市场复盘完成', gains: '上月转化率提升12%', issues: '渠道策略需细化', nextplan: '细化各渠道投放' },
+    ],
+    stats: [
+      { label: '复盘周数', icon: '🌟', color: '#dbeafe', compute: rows => rows.length },
+      { label: '本周已复盘', icon: '✅', color: '#d1fae5', compute: rows => {
+        const now = new Date();
+        const weekNum = getWeekNumber(now);
+        return rows.filter(r => r.week && r.week.includes(weekNum)).length;
+      }},
+    ]
+  },
+  todo: {
+    title: '待办工作',
+    desc: '管理你的日常工作任务',
+    columns: [
+      { key: 'task', label: '任务内容', type: 'text', width: '32%' },
+      { key: 'priority', label: '优先级', type: 'select', options: ['高', '中', '低'], width: '10%' },
+      { key: 'deadline', label: '截止日期', type: 'text', width: '14%' },
+      { key: 'status', label: '状态', type: 'select', options: ['待办', '进行中', '已完成'], width: '12%' },
+      { key: 'remark', label: '备注', type: 'text', width: '22%' },
+    ],
+    sample: [
+      { task: '完成季度销售报告', priority: '高', deadline: '2026-07-30', status: '进行中', remark: '需包含同比数据' },
+      { task: '回复客户邮件', priority: '中', deadline: '2026-07-28', status: '待办', remark: '' },
+      { task: '团队周会准备', priority: '高', deadline: '2026-07-29', status: '已完成', remark: 'PPT已发��' },
+    ],
+    stats: [
+      { label: '总任务', icon: '📋', color: '#dbeafe', compute: rows => rows.length },
+      { label: '进行中', icon: '⏰', color: '#fef3c7', compute: rows => rows.filter(r => r.status === '进行中').length },
+      { label: '已完成', icon: '✅', color: '#d1fae5', compute: rows => rows.filter(r => r.status === '已完成').length },
+      { label: '高优先级', icon: '🔥', color: '#fee2e2', compute: rows => rows.filter(r => r.priority === '高').length },
+    ]
+  },
+  schedule: {
+    title: '本周日程',
+    desc: '规划本周的时间安排',
+    columns: [
+      { key: 'date', label: '日期', type: 'text', width: '14%' },
+      { key: 'weekday', label: '星期', type: 'select', options: ['周一','周二','周三','周四','周五','周六','周日'], width: '10%' },
+      { key: 'time', label: '时间', type: 'text', width: '12%' },
+      { key: 'event', label: '事项', type: 'text', width: '30%' },
+      { key: 'location', label: '地点', type: 'text', width: '18%' },
+      { key: 'remark', label: '备注', type: 'text', width: '16%' },
+    ],
+    sample: [
+      { date: '2026-07-27', weekday: '周一', time: '09:00-10:00', event: '部门周会', location: '会议室A', remark: '' },
+      { date: '2026-07-28', weekday: '周二', time: '14:00-15:30', event: '客户拜访', location: '客户公司', remark: '带产品资料' },
+      { date: '2026-07-30', weekday: '周四', time: '10:00-11:00', event: '项目评审', location: '线上会议', remark: '' },
+    ],
+    stats: [
+      { label: '本周事项', icon: '📅', color: '#dbeafe', compute: rows => rows.length },
+      { label: '本周天数', icon: '🗓️', color: '#fef3c7', compute: rows => new Set(rows.map(r => r.date)).size },
+      { label: '会议数', icon: '🤝', color: '#e0e7ff', compute: rows => rows.filter(r => r.event && r.event.includes('会议')).length },
+    ]
+  },
+  meeting: {
+    title: '会议资料整理',
+    desc: '归档与追踪会议要点（支持录音上传 + AI 整理纪要）',
+    columns: [
+      { key: 'date', label: '会议日期', type: 'text', width: '12%' },
+      { key: 'name', label: '会议名称', type: 'text', width: '24%' },
+      { key: 'participants', label: '参会人员', type: 'text', width: '20%' },
+      { key: 'keypoints', label: '关键要点', type: 'text', width: '28%' },
+      { key: 'followup', label: '后续跟进', type: 'text', width: '16%' },
+    ],
+    sample: [
+      { date: '2026-07-20', name: 'Q3 产品规划会', participants: '产品、研发、设计', keypoints: '确定3个核心功能优先级', followup: '8月10日出方案' },
+      { date: '2026-07-22', name: '市场复盘会', participants: '市场、销售', keypoints: '上月转化率提升12%', followup: '细化渠道策略' },
+    ],
+    stats: [
+      { label: '会议总数', icon: '📂', color: '#dbeafe', compute: rows => rows.length },
+      { label: '本周会议', icon: '📌', color: '#fef3c7', compute: rows => rows.length },
+    ]
+  },
+  finance: {
+    title: '理财实时咨询',
+    desc: '每日理财市场全景：热点 · 行情 · 板块 · 资金 · 概念 · 分析',
+    columns: [
+      { key: 'date', label: '日期', type: 'text', width: '9%' },
+      { key: 'hotspot', label: '当日热点', type: 'text', width: '16%' },
+      { key: 'market', label: '行情', type: 'text', width: '14%' },
+      { key: 'sector', label: '板块行情', type: 'text', width: '15%' },
+      { key: 'capital', label: '资金进出排行', type: 'text', width: '16%' },
+      { key: 'concept', label: '热门概念', type: 'text', width: '14%' },
+      { key: 'analysis', label: '市场分析', type: 'text', width: '16%' },
+    ],
+    sample: [
+      { date: '2026-07-27', hotspot: '央行降准0.25个百分点', market: '沪指+1.2%，深成指+1.5%，创业板+1.8%', sector: '新能源领涨+3.2%，半导体+2.8%，银行-0.5%', capital: '北向资金净流入+85亿，主力净流入新能源+22亿', concept: '固态电池、钙钛矿电池、AI芯片', analysis: '降准释放流动性，成长板块受益，关注新能源景气度持续性' },
+      { date: '2026-07-26', hotspot: '美联储维持利率不变', market: '沪指+0.8%，深成指+0.6%', sector: '消费+1.5%，医药+1.2%，地产-0.8%', capital: '北向资金净流入+45亿，主力净流入消费+15亿', concept: '创新药、白酒、黄金', analysis: '外围鸽派提振风险偏好，关注黄金避险与创新药' },
+      { date: '2026-07-25', hotspot: '半年报业绩预告密集披露', market: '沪指-0.3%，深成指+0.2%', sector: 'TMT+1.8%，周期-1.2%，金融+0.1%', capital: '北向资金净流出-12亿，主力净流入TMT+18亿', concept: '算力、光模块、存储芯片', analysis: '业绩驱动分化，关注AI产业链业绩兑现' },
+    ],
+    stats: [
+      { label: '记录天数', icon: '💰', color: '#dbeafe', compute: rows => new Set(rows.map(r => r.date)).size },
+      { label: '总条数', icon: '📊', color: '#e0e7ff', compute: rows => rows.length },
+      { label: '今日更新', icon: '📌', color: '#fef3c7', compute: rows => {
+        const today = new Date().toISOString().slice(0,10);
+        return rows.filter(r => r.date === today).length;
+      }},
+      { label: '本周记录', icon: '🗓️', color: '#d1fae5', compute: rows => {
+        const now = new Date();
+        const weekAgo = new Date(now.getTime() - 7*24*60*60*1000);
+        return rows.filter(r => {
+          if (!r.date) return false;
+          const t = new Date(r.date);
+          return !isNaN(t.getTime()) && t >= weekAgo && t <= now;
+        }).length;
+      }},
+    ]
+  },
+  reminder: {
+    title: '提醒功能',
+    desc: '管理各类提醒事项，到期自动高亮',
+    columns: [
+      { key: 'title', label: '提醒事项', type: 'text', width: '24%' },
+      { key: 'remindTime', label: '提醒时间', type: 'text', width: '16%' },
+      { key: 'type', label: '类型', type: 'select', options: ['工作','会议','生活','健康','理财','其他'], width: '12%' },
+      { key: 'repeat', label: '重复', type: 'select', options: ['不重复','每天','每周','每月','工作日'], width: '12%' },
+      { key: 'status', label: '状态', type: 'select', options: ['待提醒','已提醒','已完成','已忽略'], width: '12%' },
+      { key: 'remark', label: '备注', type: 'text', width: '24%' },
+    ],
+    sample: [
+      { title: '部门周会', remindTime: '2026-07-28 09:00', type: '会议', repeat: '每周', status: '待提醒', remark: '准备本周汇报' },
+      { title: '客户回访电话', remindTime: '2026-07-28 14:30', type: '工作', repeat: '不重复', status: '待提醒', remark: '张先生' },
+      { title: '健身打卡', remindTime: '2026-07-28 19:00', type: '健康', repeat: '每天', status: '待提醒', remark: '' },
+      { title: '基金定扣日', remindTime: '2026-08-01 09:00', type: '理财', repeat: '每月', status: '待提醒', remark: '每月1日扣款' },
+    ],
+    stats: [
+      { label: '提醒总数', icon: '🔔', color: '#dbeafe', compute: rows => rows.length },
+      { label: '待提醒', icon: '⏰', color: '#fef3c7', compute: rows => rows.filter(r => r.status === '待提醒').length },
+      { label: '已过期', icon: '🔴', color: '#fee2e2', compute: rows => {
+        const now = new Date();
+        return rows.filter(r => {
+          if (!r.remindTime || r.status === '已完成' || r.status === '已忽略') return false;
+          const t = new Date(r.remindTime.replace(' ', 'T'));
+          return !isNaN(t.getTime()) && t < now;
+        }).length;
+      }},
+      { label: '今日到期', icon: '📌', color: '#e0e7ff', compute: rows => {
+        const today = new Date().toISOString().slice(0,10);
+        return rows.filter(r => r.remindTime && r.remindTime.startsWith(today) && r.status === '待提醒').length;
+      }},
+    ]
+  },
+  memo: {
+    title: '备忘录',
+    desc: '随手记录灵感、想法与待记事项',
+    columns: [
+      { key: 'date', label: '日期', type: 'text', width: '12%' },
+      { key: 'title', label: '标题', type: 'text', width: '22%' },
+      { key: 'content', label: '内容', type: 'text', width: '40%' },
+      { key: 'tag', label: '标签', type: 'select', options: ['灵感','想法','待记','资料','学习','生活','其他'], width: '12%' },
+      { key: 'status', label: '状态', type: 'select', options: ['活跃','已归档'], width: '14%' },
+    ],
+    sample: [
+      { date: '2026-07-27', title: '产品优化灵感', content: '支付流程可以增加"记忆上次支付方式"功能，提升复购体验', tag: '灵感', status: '活跃' },
+      { date: '2026-07-26', title: '读《深度工作》笔记', content: '专注力是稀缺资源，每天预留2小时不受打扰的深度工作时段', tag: '学习', status: '活跃' },
+      { date: '2026-07-25', title: '周末家庭计划', content: '周六带孩子去科技馆，周日家庭聚餐', tag: '生活', status: '活跃' },
+    ],
+    stats: [
+      { label: '备忘总数', icon: '📝', color: '#dbeafe', compute: rows => rows.length },
+      { label: '今日新增', icon: '📌', color: '#fef3c7', compute: rows => {
+        const today = new Date().toISOString().slice(0,10);
+        return rows.filter(r => r.date === today).length;
+      }},
+      { label: '灵感', icon: '💡', color: '#fef3c7', compute: rows => rows.filter(r => r.tag === '灵感').length },
+      { label: '学习', icon: '📚', color: '#d1fae5', compute: rows => rows.filter(r => r.tag === '学习').length },
+    ]
+  }
+};
+
+// ============ 状态 ============
+let currentKey = 'review';
+let data = {};
+let lastGeneratedMinutes = null; // 上一次 AI 整理的结果
+let recognition = null; // 语音识别实例
+
+// 获取 ISO 周次，如 "2026-W30"
+function getWeekNumber(d) {
+  d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const weekNum = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+  return d.getUTCFullYear() + '-W' + String(weekNum).padStart(2, '0');
+}
+
+// 从 localStorage 读取
+function loadData() {
+  const saved = localStorage.getItem('workbench_data_v5');
+  if (saved) {
+    try {
+      data = JSON.parse(saved);
+      Object.keys(CONFIG).forEach(k => {
+        if (!data[k]) data[k] = JSON.parse(JSON.stringify(CONFIG[k].sample));
+      });
+      return;
+    } catch(e) {}
+  }
+  Object.keys(CONFIG).forEach(k => {
+    data[k] = JSON.parse(JSON.stringify(CONFIG[k].sample));
+  });
+  saveData();
+}
+
+function saveData() {
+  localStorage.setItem('workbench_data_v5', JSON.stringify(data));
+}
+
+// ============ 渲染 ============
+function renderMenu() {
+  document.querySelectorAll('#menu li').forEach(li => {
+    li.classList.toggle('active', li.dataset.key === currentKey);
+  });
+}
+
+function renderPage() {
+  const cfg = CONFIG[currentKey];
+  document.getElementById('pageTitle').textContent = cfg.title;
+  document.getElementById('pageDesc').textContent = cfg.desc;
+  // 仅 meeting 模块显示录音面板
+  document.getElementById('recordPanel').style.display = (currentKey === 'meeting') ? 'block' : 'none';
+  // memo 模块：显示备忘录列表，隐藏表格
+  if (currentKey === 'memo') {
+    document.getElementById('tableCard').style.display = 'none';
+    document.getElementById('memoNoteView').style.display = 'none';
+    renderMemoList();
+  } else {
+    document.getElementById('tableCard').style.display = 'block';
+    document.getElementById('memoNoteView').style.display = 'none';
+  }
+  renderStats();
+  if (currentKey !== 'memo') {
+    renderTable();
+  }
+}
+
+// ============ 备忘录列表渲染 ============
+function renderMemoList() {
+  const rows = data.memo;
+  const container = document.getElementById('tableCard');
+  container.style.display = 'block';
+
+  if (rows.length === 0) {
+    container.innerHTML = `<div class="memo-list"><div class="memo-empty"><div class="big-icon">📝</div><div>暂无备忘，点击右上角「新增一行」创建</div></div></div>`;
+    return;
+  }
+
+  const html = '<div class="memo-list">' + rows.map((row, idx) => {
+    const title = escapeHtml(row.title || '（未命名）');
+    const preview = escapeHtml((row.content || '').slice(0, 120));
+    const date = escapeHtml(row.date || '');
+    const tag = escapeHtml(row.tag || '其他');
+    const status = escapeHtml(row.status || '活跃');
+    const archivedTag = status === '已归档' ? '<span class="memo-card-tag tag-其他" style="margin-left:6px;">归档</span>' : '';
+    return `<div class="memo-card" onclick="openMemoNote(${idx})">
+      <div class="memo-card-title">${title}</div>
+      <div class="memo-card-preview">${preview || '点击展开记事...'}</div>
+      <div class="memo-card-footer">
+        <span><span class="memo-card-tag tag-${tag}">${tag}</span>${archivedTag}</span>
+        <span>${date}</span>
+      </div>
+    </div>`;
+  }).join('') + '</div>';
+
+  container.innerHTML = html;
+}
+
+// ============ 备忘录记事本视图 ============
+let currentMemoIdx = -1;
+
+function openMemoNote(idx) {
+  currentMemoIdx = idx;
+  const row = data.memo[idx];
+  document.getElementById('tableCard').style.display = 'none';
+  document.getElementById('memoNoteView').style.display = 'flex';
+
+  document.getElementById('memoNoteTitle').value = row.title || '';
+  document.getElementById('memoNoteDate').value = row.date || '';
+  document.getElementById('memoNoteTag').value = row.tag || '其他';
+  document.getElementById('memoNoteStatus').value = row.status || '活跃';
+  document.getElementById('memoNoteContent').value = row.content || '';
+  updateWordCount();
+
+  // 聚焦内容区
+  setTimeout(() => document.getElementById('memoNoteContent').focus(), 100);
+}
+
+function backToMemoList() {
+  saveCurrentMemo();
+  currentMemoIdx = -1;
+  document.getElementById('memoNoteView').style.display = 'none';
+  document.getElementById('tableCard').style.display = 'block';
+  renderMemoList();
+  renderStats();
+  showToast('已保存');
+}
+
+function saveCurrentMemo() {
+  if (currentMemoIdx < 0) return;
+  data.memo[currentMemoIdx].title = document.getElementById('memoNoteTitle').value;
+  data.memo[currentMemoIdx].date = document.getElementById('memoNoteDate').value;
+  data.memo[currentMemoIdx].tag = document.getElementById('memoNoteTag').value;
+  data.memo[currentMemoIdx].status = document.getElementById('memoNoteStatus').value;
+  data.memo[currentMemoIdx].content = document.getElementById('memoNoteContent').value;
+  saveData();
+  renderStats();
+}
+
+function updateWordCount() {
+  const text = document.getElementById('memoNoteContent').value;
+  document.getElementById('memoWordCount').textContent = text.length + ' 字';
+}
+
+function deleteCurrentMemo() {
+  if (currentMemoIdx < 0) return;
+  if (!confirm('确定删除这条备忘吗？')) return;
+  data.memo.splice(currentMemoIdx, 1);
+  saveData();
+  currentMemoIdx = -1;
+  document.getElementById('memoNoteView').style.display = 'none';
+  document.getElementById('tableCard').style.display = 'block';
+  renderMemoList();
+  renderStats();
+  showToast('已删除');
+}
+
+function renderStats() {
+  const cfg = CONFIG[currentKey];
+  const rows = data[currentKey];
+  const html = cfg.stats.map(s => `
+    <div class="stat-card">
+      <div class="stat-icon" style="background:${s.color}">${s.icon}</div>
+      <div>
+        <div class="stat-num">${s.compute(rows)}</div>
+        <div class="stat-label">${s.label}</div>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('stats').innerHTML = html;
+}
+
+function renderTable() {
+  const cfg = CONFIG[currentKey];
+  const rows = data[currentKey];
+
+  const headHtml = '<tr>' + cfg.columns.map(c => `<th style="width:${c.width}">${c.label}</th>`).join('') + '<th class="col-action">操作</th></tr>';
+  document.getElementById('tableHead').innerHTML = headHtml;
+
+  if (rows.length === 0) {
+    document.getElementById('tableBody').innerHTML = `<tr><td colspan="${cfg.columns.length + 1}"><div class="empty-state"><div class="big-icon">📝</div><div>暂无数据，点击右上角「新增一行」开始</div></div></td></tr>`;
+    return;
+  }
+
+  const bodyHtml = rows.map((row, rIdx) => {
+    // 提醒模块：判断行状态用于高亮
+    let rowClass = '';
+    let rowTag = '';
+    if (currentKey === 'reminder' && row.remindTime && row.status === '待提醒') {
+      const t = new Date(row.remindTime.replace(' ', 'T'));
+      const now = new Date();
+      const todayStr = now.toISOString().slice(0,10);
+      if (!isNaN(t.getTime())) {
+        if (t < now) {
+          rowClass = 'row-overdue';
+          rowTag = '<span class="row-badge badge-overdue">已过期</span>';
+        } else if (row.remindTime.startsWith(todayStr)) {
+          rowClass = 'row-today';
+          rowTag = '<span class="row-badge badge-today">今日</span>';
+        }
+      }
+    }
+    const cells = cfg.columns.map(c => {
+      if (c.type === 'select') {
+        const opts = c.options.map(o => `<option value="${o}" ${row[c.key] === o ? 'selected' : ''}>${o}</option>`).join('');
+        return `<td><select class="cell-select" onchange="updateCell(${rIdx}, '${c.key}', this.value)"><option value="">请选择</option>${opts}</select></td>`;
+      }
+      const val = escapeHtml(row[c.key] || '');
+      // 提醒模块的标题列附加徽标
+      const extraTag = (currentKey === 'reminder' && c.key === 'title') ? rowTag : '';
+      return `<td><div class="cell" contenteditable="true" data-row="${rIdx}" data-key="${c.key}">${val}${extraTag}</div></td>`;
+    }).join('');
+    return `<tr class="${rowClass}">${cells}<td class="col-action"><div class="cell"><button class="btn-danger-sm" onclick="deleteRow(${rIdx})" title="删除">🗑</button></div></td></tr>`;
+  }).join('');
+  document.getElementById('tableBody').innerHTML = bodyHtml;
+
+  document.querySelectorAll('.cell[contenteditable]').forEach(el => {
+    el.addEventListener('blur', () => {
+      const r = parseInt(el.dataset.row);
+      const k = el.dataset.key;
+      updateCell(r, k, el.innerText);
+    });
+  });
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ============ 操作 ============
+function switchMenu(key) {
+  currentKey = key;
+  renderMenu();
+  renderPage();
+}
+
+function addRow() {
+  const cfg = CONFIG[currentKey];
+  const newRow = {};
+  cfg.columns.forEach(c => { newRow[c.key] = ''; });
+  // 智能默认值
+  const now = new Date();
+  const todayStr = now.toISOString().slice(0,10);
+  if (currentKey === 'finance') {
+    newRow.date = todayStr;
+  } else if (currentKey === 'reminder') {
+    // 默认提醒时间：明天此时
+    const tomorrow = new Date(now.getTime() + 24*60*60*1000);
+    const pad = n => String(n).padStart(2,'0');
+    newRow.remindTime = tomorrow.getFullYear()+'-'+pad(tomorrow.getMonth()+1)+'-'+pad(tomorrow.getDate())+' '+pad(tomorrow.getHours())+':'+pad(tomorrow.getMinutes());
+    newRow.status = '待提醒';
+    newRow.repeat = '不重复';
+  } else if (currentKey === 'review') {
+    newRow.week = getWeekNumber(now);
+  } else if (currentKey === 'schedule' || currentKey === 'meeting') {
+    newRow.date = todayStr;
+  } else if (currentKey === 'memo') {
+    newRow.date = todayStr;
+    newRow.status = '活跃';
+    newRow.tag = '灵感';
+  }
+  data[currentKey].push(newRow);
+  saveData();
+  renderStats();
+  if (currentKey === 'memo') {
+    // 直接打开记事本视图
+    renderMemoList();
+    openMemoNote(data.memo.length - 1);
+    showToast('已创建新备忘，开始书写');
+  } else {
+    renderTable();
+    showToast('已新增一行');
+    const tbody = document.getElementById('tableBody');
+    tbody.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+function deleteRow(idx) {
+  if (!confirm('确定删除这一行吗？')) return;
+  data[currentKey].splice(idx, 1);
+  saveData();
+  renderTable();
+  renderStats();
+  showToast('已删除');
+}
+
+function updateCell(rowIdx, key, value) {
+  data[currentKey][rowIdx][key] = value;
+  saveData();
+  renderStats();
+}
+
+function exportCSV() {
+  const cfg = CONFIG[currentKey];
+  const rows = data[currentKey];
+  const header = cfg.columns.map(c => c.label);
+  const lines = [header.join(',')];
+  rows.forEach(r => {
+    const line = cfg.columns.map(c => {
+      const v = (r[c.key] || '').toString().replace(/"/g, '""');
+      return `"${v}"`;
+    }).join(',');
+    lines.push(line);
+  });
+  const csv = '\uFEFF' + lines.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${cfg.title}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('已导出 CSV');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// ============ 会议录音整理功能 ============
+
+// 上传录音文件处理
+document.getElementById('audioFile').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const nameEl = document.getElementById('fileName');
+  nameEl.textContent = '📎 ' + file.name + ' (' + (file.size/1024/1024).toFixed(2) + ' MB)';
+  nameEl.style.display = 'inline-block';
+
+  // 尝试用 Web Speech API 边播放边识别（浏览器支持有限）
+  tryAudioTranscribe(file);
+});
+
+// 尝试对音频文件进行转写
+function tryAudioTranscribe(file) {
+  const statusEl = document.getElementById('transcribeStatus');
+  const textarea = document.getElementById('meetingText');
+
+  // 检查浏览器是否支持 Web Speech API
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    statusEl.className = 'transcribe-status info show';
+    statusEl.innerHTML = '⚠️ 当前浏览器不支持音频文件自动转写。请直接在文本框<strong>粘贴会议记录文字</strong>（如录音转写文本、会议笔记、聊天记录），再点击「AI 整理会议纪要」。';
+    return;
+  }
+
+  // 使用音频播放 + SpeechRecognition 实时捕获的方式
+  statusEl.className = 'transcribe-status info show';
+  statusEl.innerHTML = '<span class="spinner"></span>正在播放录音并转写，请保持页面打开...';
+
+  const audio = new Audio(URL.createObjectURL(file));
+  audio.playbackRate = 1.0;
+
+  recognition = new SpeechRecognition();
+  recognition.lang = 'zh-CN';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  let finalText = '';
+  recognition.onresult = function(event) {
+    let interim = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        finalText += transcript;
+      } else {
+        interim += transcript;
+      }
+    }
+    textarea.value = finalText + interim;
+  };
+
+  recognition.onerror = function(event) {
+    statusEl.className = 'transcribe-status error show';
+    statusEl.innerHTML = '❌ 转写出错：' + event.error + '。建议直接粘贴��议文字记录。';
+  };
+
+  recognition.onend = function() {
+    if (finalText) {
+      statusEl.className = 'transcribe-status success show';
+      statusEl.innerHTML = '✅ 转写完成，共识别 ' + finalText.length + ' 字。可在上方文本框编辑后，点击「AI 整理会议纪要」。';
+    } else {
+      statusEl.className = 'transcribe-status info show';
+      statusEl.innerHTML = '⚠️ 未能识别到内容。建议直接粘贴会议文字记录。';
+    }
+  };
+
+  audio.play();
+  recognition.start();
+
+  audio.onended = function() {
+    try { recognition.stop(); } catch(e) {}
+    URL.revokeObjectURL(audio.src);
+  };
+}
+
+// 实时录音转写（麦克风）
+function startRealTimeTranscribe() {
+  const statusEl = document.getElementById('transcribeStatus');
+  const textarea = document.getElementById('meetingText');
+  const btn = event.target;
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    statusEl.className = 'transcribe-status error show';
+    statusEl.innerHTML = '❌ 当前浏览器不支持语音识别。建议使用 Chrome 浏览器，或直接粘贴会议文字记录。';
+    return;
+  }
+
+  if (recognition && btn.dataset.active === '1') {
+    recognition.stop();
+    btn.dataset.active = '0';
+    btn.textContent = '🎤 实时录音转写';
+    return;
+  }
+
+  recognition = new SpeechRecognition();
+  recognition.lang = 'zh-CN';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  let baseText = textarea.value ? textarea.value + '\n' : '';
+  let finalText = baseText;
+
+  recognition.onresult = function(event) {
+    let interim = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        finalText += transcript;
+      } else {
+        interim += transcript;
+      }
+    }
+    textarea.value = finalText + interim;
+  };
+
+  recognition.onerror = function(event) {
+    statusEl.className = 'transcribe-status error show';
+    statusEl.innerHTML = '❌ 识别出错：' + event.error + '。请检查麦克风权限。';
+    btn.dataset.active = '0';
+    btn.textContent = '🎤 实时录音转写';
+  };
+
+  recognition.onend = function() {
+    btn.dataset.active = '0';
+    btn.textContent = '🎤 实时录音转写';
+    statusEl.className = 'transcribe-status success show';
+    statusEl.innerHTML = '✅ 实时转写已结束，可在上方文本框编辑。';
+  };
+
+  try {
+    recognition.start();
+    btn.dataset.active = '1';
+    btn.textContent = '⏹️ 停止录音';
+    statusEl.className = 'transcribe-status info show';
+    statusEl.innerHTML = '<span class="spinner"></span>正在录音识别，请说话...（点击按钮停止）';
+  } catch(e) {
+    statusEl.className = 'transcribe-status error show';
+    statusEl.innerHTML = '❌ 启动失败：' + e.message;
+  }
+}
+
+function clearMeetingText() {
+  document.getElementById('meetingText').value = '';
+  document.getElementById('transcribeStatus').className = 'transcribe-status';
+  document.getElementById('transcribeStatus').innerHTML = '';
+  document.getElementById('fileName').style.display = 'none';
+  document.getElementById('audioFile').value = '';
+}
+
+// AI 整理会议纪要 —— 本地智能解析
+function generateMinutes() {
+  const text = document.getElementById('meetingText').value.trim();
+  if (!text) {
+    showToast('请先上传录音转写或粘贴会议文字记录');
+    return;
+  }
+
+  const statusEl = document.getElementById('transcribeStatus');
+  statusEl.className = 'transcribe-status info show';
+  statusEl.innerHTML = '<span class="spinner"></span>AI 正在分析会议内容...';
+
+  // 模拟 AI 处理延迟
+  setTimeout(() => {
+    const result = parseMeetingText(text);
+    lastGeneratedMinutes = result;
+
+    // 渲染预览
+    const html = `
+<div><span class="field-label">📅 会议日期：</span>${result.date || '未识别'}</div>
+<div><span class="field-label">📝 会议名称：</span>${result.name || '未识别'}</div>
+<div><span class="field-label">👥 参会人员：</span>${result.participants || '未识别'}</div>
+<div><span class="field-label">💡 关键要点：</span>${(result.keypoints || '未识别').replace(/\n/g, '<br>')}</div>
+<div><span class="field-label">📌 后续跟进：</span>${(result.followup || '未识别').replace(/\n/g, '<br>')}</div>
+<div style="margin-top:10px;font-size:12px;color:var(--text-secondary);border-top:1px solid var(--border);padding-top:10px;">点击「确认填入表格」将作为新一行添加到下方表格，可再编辑。</div>
+`;
+    document.getElementById('aiResultContent').innerHTML = html;
+    document.getElementById('resultModal').classList.add('show');
+
+    statusEl.className = 'transcribe-status success show';
+    statusEl.innerHTML = '✅ 整理完成！请查看预览并确认填入表格。';
+  }, 800);
+}
+
+// 智能解析会议文本，提取结构化信息
+function parseMeetingText(text) {
+  const result = {
+    date: '',
+    name: '',
+    participants: '',
+    keypoints: '',
+    followup: ''
+  };
+
+  // ===== 1. 提取日期 =====
+  const datePatterns = [
+    /(\d{4}年\d{1,2}月\d{1,2}日)/,
+    /(\d{4}-\d{1,2}-\d{1,2})/,
+    /(\d{4}\/\d{1,2}\/\d{1,2})/,
+    /(\d{1,2}月\d{1,2}日)/,
+    /(今天|昨天|前天|本周一|本周二|本周三|本周四|本周五|本周六|本周日|周一|周二|周三|周四|周五|周六|周日)/
+  ];
+  for (const p of datePatterns) {
+    const m = text.match(p);
+    if (m) { result.date = m[1]; break; }
+  }
+  if (!result.date) {
+    const today = new Date();
+    result.date = today.toISOString().slice(0, 10);
+  }
+
+  // ===== 2. 提取会议名称 =====
+  const namePatterns = [
+    /(?:召开|召开了一次|开了一次|举行了|开展了)\s*[""「]?([^""」。，,]{2,20}(?:会|会议|讨论|评审|复盘|规划|对齐|sync|Sync))[""」]?/,
+    /(\S{2,20}(?:会|会议))\s*(?:上|中|里)/,
+    /(?:关于|有关)\s*([^""」。，,]{2,20})\s*的?(?:会|会议)/,
+    /[""「]([^""」]{2,30}(?:会|会议|讨论|评审))[""」]/
+  ];
+  for (const p of namePatterns) {
+    const m = text.match(p);
+    if (m && m[1]) { result.name = m[1].trim(); break; }
+  }
+  if (!result.name) {
+    // 用文本前 15 字作为名称
+    result.name = text.slice(0, 15).replace(/\n/g, ' ').trim() + (text.length > 15 ? '...' : '');
+  }
+
+  // ===== 3. 提取参会人员 =====
+  const participantPatterns = [
+    /(?:参会人员|参加人员|出席人员|参与人员|与会人员|参会者|出席)\s*[：:是为有]?\s*([^。\n]{2,100})/,
+    /(?:参会的有|参加的有|出席的有|到场有|现场有)\s*([^。\n]{2,100})/,
+    /(?:人员[：:])\s*([^。\n]{2,100})/
+  ];
+  for (const p of participantPatterns) {
+    const m = text.match(p);
+    if (m && m[1]) {
+      result.participants = m[1].trim().split(/[，,;；]/).slice(0, 8).join('、');
+      break;
+    }
+  }
+  if (!result.participants) {
+    // 尝试识别人名（X经理/X总/小X/老X）
+    const names = new Set();
+    const namePatterns = [
+      /([小老]\S{1,3})(?:说|表示|提出|建议|负责|认为|指出|汇报|确认|同意|补充)/g,
+      /(\S{1,4}(?:经理|总|总监|负责人|主管|工程师|设计师|产品经理|开发|测试|运营|销售))(?:说|表示|提出|建议|负责|认为|指出|汇报|确认|同意|补充)?/g
+    ];
+    for (const p of namePatterns) {
+      let m;
+      while ((m = p.exec(text)) !== null) {
+        if (m[1] && m[1].length <= 8) names.add(m[1]);
+      }
+    }
+    if (names.size > 0) {
+      result.participants = Array.from(names).slice(0, 8).join('、');
+    }
+  }
+
+  // ===== 4. 提取关键要点 =====
+  const points = [];
+  // 按 1. 2. 3. 或 - * • 等列表项分割
+  const listItems = text.split(/(?:\n|。|；;)\s*(?:\d+[.、）)]|[-*•·])/);
+  if (listItems.length > 1) {
+    listItems.slice(1).forEach(item => {
+      const s = item.trim().replace(/\n/g, ' ');
+      if (s.length >= 5 && s.length <= 80) points.push(s);
+    });
+  }
+  // 识别"讨论了"、"确定了"、"决定"、"认为"、"发现"等关键句
+  const keyVerbs = /(?:讨论了|确定了|决定|认定|达成共识|一致认为|认为|发现|分析了|总结了|强调了|指出|明确了)\s*([^。\n]{8,100})/g;
+  let m;
+  while ((m = keyVerbs.exec(text)) !== null) {
+    const s = m[0].trim();
+    if (!points.includes(s) && s.length >= 8) points.push(s);
+  }
+  // 如果没识别到，取前几句
+  if (points.length === 0) {
+    const sentences = text.split(/[。\n]/).map(s => s.trim()).filter(s => s.length >= 10 && s.length <= 100);
+    points.push(...sentences.slice(0, 3));
+  }
+  result.keypoints = points.slice(0, 6).map((p, i) => (i + 1) + '. ' + p).join('\n');
+
+  // ===== 5. 提取后续跟进 =====
+  const followups = [];
+  const followPatterns = [
+    /(?:负责|牵头|跟进|落实|执行|完成|输出|提交|对齐|同步|安排|约定)\s*([^。\n]{5,80})/g,
+    /(?:下周|本周|月底|下周前|本周前|\d+月\d+日|\d+号|周[一二三四五六日])\s*([^。\n]{5,80})/g,
+    /(?:待办|TODO|Action|后续|下一步|接下来)\s*[：:]?\s*([^。\n]{5,100})/g
+  ];
+  for (const p of followPatterns) {
+    let m;
+    while ((m = p.exec(text)) !== null) {
+      const s = m[0].trim().replace(/\n/g, ' ');
+      if (s.length >= 5 && !followups.includes(s)) followups.push(s);
+    }
+  }
+  if (followups.length === 0) {
+    // 识别人名 + 动作
+    const actionRe = /([小老]\S{1,3}|\S{1,4}(?:经理|总|总监|负责人|主管))\s*(?:负责|将|会|要|需要|应该)\s*([^。\n]{5,60})/g;
+    let m;
+    while ((m = actionRe.exec(text)) !== null) {
+      followups.push(m[0].trim());
+    }
+  }
+  result.followup = followups.slice(0, 5).map((p, i) => (i + 1) + '. ' + p).join('\n') || '待补充';
+
+  return result;
+}
+
+function closeModal() {
+  document.getElementById('resultModal').classList.remove('show');
+}
+
+function confirmFillMinutes() {
+  if (!lastGeneratedMinutes) return;
+  data.meeting.push({
+    date: lastGeneratedMinutes.date,
+    name: lastGeneratedMinutes.name,
+    participants: lastGeneratedMinutes.participants,
+    keypoints: lastGeneratedMinutes.keypoints,
+    followup: lastGeneratedMinutes.followup
+  });
+  saveData();
+  renderTable();
+  renderStats();
+  closeModal();
+  showToast('已填入表格，可点击单元格编辑');
+  setTimeout(() => {
+    const tbody = document.getElementById('tableBody');
+    tbody.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 100);
+}
+
+// ============ 事件绑定 ============
+document.querySelectorAll('#menu li').forEach(li => {
+  li.addEventListener('click', () => switchMenu(li.dataset.key));
+});
+
+// 点击模态遮罩关闭
+document.getElementById('resultModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// 备忘录记事本：实时保存 + 字数统计
+document.getElementById('memoNoteContent').addEventListener('input', updateWordCount);
+document.getElementById('memoNoteTitle').addEventListener('blur', saveCurrentMemo);
+document.getElementById('memoNoteDate').addEventListener('blur', saveCurrentMemo);
+document.getElementById('memoNoteTag').addEventListener('change', saveCurrentMemo);
+document.getElementById('memoNoteStatus').addEventListener('change', saveCurrentMemo);
+// 内容失焦时保存
+document.getElementById('memoNoteContent').addEventListener('blur', saveCurrentMemo);
+
+// ============ 初始化 ============
+loadData();
+renderPage();
+</script>
+</body>
+</html>
