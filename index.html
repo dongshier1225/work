@@ -821,7 +821,11 @@
       <span class="icon">📝</span><span>备忘录</span>
     </li>
   </ul>
-  <div class="sidebar-footer">数据本地存储 · 自动保存</div>
+  <div class="sidebar-footer">
+    <button onclick="exportBackup()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:12px;margin-bottom:6px;width:100%;">💾 备份数据</button>
+    <button onclick="importBackup()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:12px;width:100%;">📂 恢复数据</button>
+    <div style="margin-top:6px;font-size:11px;opacity:0.7;">数据本地存储 · 自动保存</div>
+  </div>
 </aside>
 
 <!-- 主内容 -->
@@ -1428,6 +1432,52 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(t._timer);
+
+// ============ 数据备份与恢复 ============
+function exportBackup() {
+  const backup = {
+    app: '日必行',
+    version: 'v5',
+    exportDate: new Date().toISOString(),
+    data: data
+  };
+  const json = JSON.stringify(backup, null, 2);
+  const blob = new Blob([json], { type: 'application/json;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `日必行备份_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('💾 备份文件已下载！');
+}
+
+function importBackup() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      try {
+        const backup = JSON.parse(ev.target.result);
+        if (!backup.data) { showToast('❌ 文件格式错误'); return; }
+        if (confirm('恢复将覆盖当前所有数据，确定继续吗？')) {
+          data = backup.data;
+          localStorage.setItem('workbench_data_v5', JSON.stringify(data));
+          renderPage();
+          showToast('✅ 数据恢复成功！');
+        }
+      } catch (err) {
+        showToast('❌ 文件解析失败');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
   t._timer = setTimeout(() => t.classList.remove('show'), 1800);
 }
 
