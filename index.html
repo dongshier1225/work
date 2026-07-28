@@ -811,9 +811,6 @@
     <li data-key="meeting">
       <span class="icon">📂</span><span>会议资料整理</span>
     </li>
-    <li data-key="finance">
-      <span class="icon">💰</span><span>理财实时咨询</span>
-    </li>
     <li data-key="reminder">
       <span class="icon">🔔</span><span>提醒功能</span>
     </li>
@@ -1015,41 +1012,6 @@ const CONFIG = {
     stats: [
       { label: '会议总数', icon: '📂', color: '#dbeafe', compute: rows => rows.length },
       { label: '本周会议', icon: '📌', color: '#fef3c7', compute: rows => rows.length },
-    ]
-  },
-  finance: {
-    title: '理财实时咨询',
-    desc: '每日理财市场全景：热点 · 行情 · 板块 · 资金 · 概念 · 分析',
-    columns: [
-      { key: 'date', label: '日期', type: 'text', width: '9%' },
-      { key: 'hotspot', label: '当日热点', type: 'text', width: '16%' },
-      { key: 'market', label: '行情', type: 'text', width: '14%' },
-      { key: 'sector', label: '板块行情', type: 'text', width: '15%' },
-      { key: 'capital', label: '资金进出排行', type: 'text', width: '16%' },
-      { key: 'concept', label: '热门概念', type: 'text', width: '14%' },
-      { key: 'analysis', label: '市场分析', type: 'text', width: '16%' },
-    ],
-    sample: [
-      { date: '2026-07-27', hotspot: '央行降准0.25个百分点', market: '沪指+1.2%，深成指+1.5%，创业板+1.8%', sector: '新能源领涨+3.2%，半导体+2.8%，银行-0.5%', capital: '北向资金净流入+85亿，主力净流入新能源+22亿', concept: '固态电池、钙钛矿电池、AI芯片', analysis: '降准释放流动性，成长板块受益，关注新能源景气度持续性' },
-      { date: '2026-07-26', hotspot: '美联储维持利率不变', market: '沪指+0.8%，深成指+0.6%', sector: '消费+1.5%，医药+1.2%，地产-0.8%', capital: '北向资金净流入+45亿，主力净流入消费+15亿', concept: '创新药、白酒、黄金', analysis: '外围鸽派提振风险偏好，关注黄金避险与创新药' },
-      { date: '2026-07-25', hotspot: '半年报业绩预告密集披露', market: '沪指-0.3%，深成指+0.2%', sector: 'TMT+1.8%，周期-1.2%，金融+0.1%', capital: '北向资金净流出-12亿，主力净流入TMT+18亿', concept: '算力、光模块、存储芯片', analysis: '业绩驱动分化，关注AI产业链业绩兑现' },
-    ],
-    stats: [
-      { label: '记录天数', icon: '💰', color: '#dbeafe', compute: rows => new Set(rows.map(r => r.date)).size },
-      { label: '总条数', icon: '📊', color: '#e0e7ff', compute: rows => rows.length },
-      { label: '今日更新', icon: '📌', color: '#fef3c7', compute: rows => {
-        const today = new Date().toISOString().slice(0,10);
-        return rows.filter(r => r.date === today).length;
-      }},
-      { label: '本周记录', icon: '🗓️', color: '#d1fae5', compute: rows => {
-        const now = new Date();
-        const weekAgo = new Date(now.getTime() - 7*24*60*60*1000);
-        return rows.filter(r => {
-          if (!r.date) return false;
-          const t = new Date(r.date);
-          return !isNaN(t.getTime()) && t >= weekAgo && t <= now;
-        }).length;
-      }},
     ]
   },
   reminder: {
@@ -1355,9 +1317,7 @@ function addRow() {
   // 智能默认值
   const now = new Date();
   const todayStr = now.toISOString().slice(0,10);
-  if (currentKey === 'finance') {
-    newRow.date = todayStr;
-  } else if (currentKey === 'reminder') {
+  if (currentKey === 'reminder') {
     // 默认提醒时间：明天此时
     const tomorrow = new Date(now.getTime() + 24*60*60*1000);
     const pad = n => String(n).padStart(2,'0');
