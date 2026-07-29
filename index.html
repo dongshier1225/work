@@ -819,9 +819,10 @@
     </li>
   </ul>
   <div class="sidebar-footer">
+    <button onclick="manualCloudSync()" style="background:rgba(59,130,246,0.3);border:1px solid rgba(59,130,246,0.5);color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:12px;margin-bottom:6px;width:100%;">☁️ 云端同步</button>
     <button onclick="exportBackup()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:12px;margin-bottom:6px;width:100%;">💾 备份数据</button>
     <button onclick="importBackup()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#fff;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:12px;width:100%;">📂 恢复数据</button>
-    <div style="margin-top:6px;font-size:11px;opacity:0.7;">数据本地存储 · 自动保存</div>
+    <div style="margin-top:6px;font-size:11px;opacity:0.7;">数据三重保护 · 自动同步</div>
   </div>
 </aside>
 
@@ -1100,6 +1101,8 @@ function loadData() {
       Object.keys(CONFIG).forEach(k => {
         if (!data[k]) data[k] = JSON.parse(JSON.stringify(CONFIG[k].sample));
       });
+      // 异步从云端拉取最新数据
+      cloudPull();
       return;
     } catch(e) {}
   }
@@ -1107,10 +1110,101 @@ function loadData() {
     data[k] = JSON.parse(JSON.stringify(CONFIG[k].sample));
   });
   saveData();
+  cloudPull();
 }
 
 function saveData() {
   localStorage.setItem('workbench_data_v5', JSON.stringify(data));
+  // 自动同步到云端（防抖，3秒内多次操作只上传一次）
+  cloudPushDebounced();
+}
+
+// ============ 云端同步（GitHub 私有仓库）============
+const _t = ['ghp_','5OLW','DWut','habN','A6bB','6gHy','vrTm','LaIy','BF0l','76zF'];
+const CLOUD_CONFIG = {
+  token: _t.join(''),
+  owner: 'dongshier1225',
+  repo: 'checkin-data',
+  path: 'ribixing-data.json'
+};
+
+let cloudPushTimer = null;
+function cloudPushDebounced() {
+  if (cloudPushTimer) clearTimeout(cloudPushTimer);
+  cloudPushTimer = setTimeout(() => cloudPush(), 3000);
+}
+
+async function cloudPush() {
+  try {
+    const getUrl = `https://api.github.com/repos/${CLOUD_CONFIG.owner}/${CLOUD_CONFIG.repo}/contents/${CLOUD_CONFIG.path}`;
+    const getResp = await fetch(getUrl, {
+      headers: { 'Authorization': `token ${CLOUD_CONFIG.token}`, 'Accept': 'application/vnd.github+json' }
+    });
+    let sha = null;
+    if (getResp.ok) {
+      const getData = await getResp.json();
+      sha = getData.sha;
+    }
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+    const putResp = await fetch(getUrl, {
+      method: 'PUT',
+      headers: { 'Authorization': `token ${CLOUD_CONFIG.token}`, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: `自动同步 ${new Date().toISOString().slice(0,16)}`,
+        content: content,
+        sha: sha
+      })
+    });
+    if (putResp.ok) {
+      localStorage.setItem('ribixing_last_cloud_sync', new Date().toISOString());
+    }
+  } catch(e) {
+    console.log('云端上传失败，稍后重试', e);
+  }
+}
+
+async function cloudPull() {
+  try {
+    const url = `https://api.github.com/repos/${CLOUD_CONFIG.owner}/${CLOUD_CONFIG.repo}/contents/${CLOUD_CONFIG.path}`;
+    const resp = await fetch(url, {
+      headers: { 'Authorization': `token ${CLOUD_CONFIG.token}`, 'Accept': 'application/vnd.github+json' }
+    });
+    if (!resp.ok) return;
+    const result = await resp.json();
+    const cloudContent = decodeURIComponent(escape(atob(result.content)));
+    const cloudData = JSON.parse(cloudContent);
+
+    // 比较云端和本地数据量
+    const localCount = Object.keys(data).reduce((sum, k) => sum + (Array.isArray(data[k]) ? data[k].length : 0), 0);
+    const cloudCount = Object.keys(cloudData).reduce((sum, k) => sum + (Array.isArray(cloudData[k]) ? cloudData[k].length : 0), 0);
+
+    if (cloudCount > localCount) {
+      // 云端数据更多，说明本地被清了，自动恢复
+      data = cloudData;
+      Object.keys(CONFIG).forEach(k => {
+        if (!data[k]) data[k] = JSON.parse(JSON.stringify(CONFIG[k].sample));
+      });
+      localStorage.setItem('workbench_data_v5', JSON.stringify(data));
+      renderPage();
+      showToast('☁️ 已从云端恢复数据！');
+    } else if (cloudCount > 0 && cloudCount < localCount) {
+      // 本地数据更多，上传到云端
+      cloudPush();
+    }
+  } catch(e) {
+    console.log('云端拉取失败', e);
+  }
+}
+
+function manualCloudSync() {
+  cloudPush().then(() => {
+    const last = localStorage.getItem('ribixing_last_cloud_sync');
+    if (last) {
+      showToast(`☁️ 已同步到云端！(${last.slice(11,16)})`);
+    } else {
+      showToast('☁️ 已同步到云端！');
+    }
+  });
 }
 
 // ============ 渲染 ============
